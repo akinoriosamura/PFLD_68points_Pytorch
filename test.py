@@ -3,33 +3,43 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import shutil
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 print('pid: {}     GPU: {}'.format(os.getpid(), os.environ['CUDA_VISIBLE_DEVICES']))
+
 import numpy as np
 import cv2
 import time
 from RetinaFaceMaster.test import predict
 from mtcnn.detect_face import MTCNN
-from model2 import MobileNetV2, BlazeLandMark
+from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50
 import torch
 
 
-def test_images():
-    model_path = './models2/model0/model_499.pth'
-    images_dir = './test_images_2/'  #'./data/test_data/imgs/'
+def main():
+    model_path = './models2/trial_wflw68/model_100.pth'
+    images_dir = './data/Sample_imgs/'
     image_size = 112  # 112
+    out_dir = 'sample_trial_wflw68'
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+    else:
+        shutil.rmtree(out_dir)
+        os.mkdir(out_dir)
 
-    model = BlazeLandMark(nums_class=136)
+    # model = BlazeLandMark(nums_class=136)
+    model = MyResNest50(nums_class=136)
     model = torch.load(model_path)
     model.eval()
     image_files = os.listdir(images_dir)
+    # import pdb;pdb.set_trace()
     for index, image_file in enumerate(image_files):
         image_path = os.path.join(images_dir, image_file)
         image = cv2.imread(image_path)
-        height, width, _ = image.shape
-        if image is None:
+        if (image is None) or ('.txt' in image_path):
             print(image_path)
             continue
+        height, width, _ = image.shape
         # boxes = mtcnn.predict(image)
         # image = cv2.resize(image, (width//2, height//2))
         boxes, _ = predict(image)
@@ -78,14 +88,16 @@ def test_images():
 
             pre_landmark = pre_landmark * [size/image_size, size/image_size] - [dx, dy]
             for (x, y) in pre_landmark.astype(np.int32):
-                cv2.circle(image, (x1 + x, y1 + y), 2, (0, 0, 255), 2)
+                cv2.circle(image, (x1 + x, y1 + y), 1, (0, 0, 255), 1)
         # image = cv2.resize(image, (width, height))
-        cv2.imshow('0', image)
-        if cv2.waitKey(0) == 27:
-            break
+        # cv2.imshow('0', image)
+        # if cv2.waitKey(0) == 27:
+        #     break
+        cv2.imwrite(os.path.join(out_dir, image_file), image)
+    print("finish!!!")
 
-
-def main():
+"""
+def _main():
     model_file = './models2/model0/model_499.pth'
     videl_file = './dfl.mov'
     image_size = 112  # 112
@@ -159,7 +171,8 @@ def main():
         cv2.imshow('0', image)
         if cv2.waitKey(10) == 27:
             break
+    """
 
 if __name__ == '__main__':
-    #main()
-    test_images()
+    #_main()
+    main()

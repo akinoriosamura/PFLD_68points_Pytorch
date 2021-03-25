@@ -15,6 +15,7 @@ import numpy as np
 import cv2
 import argparse
 import sys
+import re
 import time
 from generate_data import DataSet
 from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50
@@ -22,8 +23,13 @@ from utils import train_model
 from euler_angles_utils import calculate_pitch_yaw_roll
 
 
-def get_euler_angle_weights(landmarks_batch, euler_angles_pre, device):
-    TRACKED_POINTS = [17, 21, 22, 26, 36, 39, 42, 45, 31, 35, 48, 54, 57, 8]
+def get_euler_angle_weights(landmarks_batch, euler_angles_pre, device, num_label):
+    if num_label == 68:
+        TRACKED_POINTS = [17, 21, 22, 26, 36, 39, 42, 45, 31, 35, 48, 54, 57, 8]
+    elif num_label == 98:
+        TRACKED_POINTS = [33, 38, 50, 46, 60, 64, 68, 72, 55, 59, 76, 82, 85, 16]
+    else:
+        exit()
 
     euler_angles_landmarks = []
     landmarks_batch = landmarks_batch.numpy()
@@ -59,9 +65,9 @@ def main(args):
         tv.transforms.Resize((args.image_size, args.image_size)),
         tv.transforms.ToTensor()
     ])
-    train_dataset = DataSet(args.file_list, args.image_channels, args.image_size, transforms=train_data_transforms,
+    train_dataset = DataSet(args.num_label, args.file_list, args.image_channels, args.image_size, transforms=train_data_transforms,
                             is_train=True)
-    test_dataset = DataSet(args.test_list, args.image_channels, args.image_size, transforms=test_data_transforms,
+    test_dataset = DataSet(args.num_label, args.test_list, args.image_channels, args.image_size, transforms=test_data_transforms,
                            is_train=False)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=12)
@@ -81,11 +87,11 @@ def main(args):
     #MobileNetV2
     # coefficient = 0.25
     # num_of_channels = [int(64 * coefficient), int(128 * coefficient), int(16 * coefficient), int(32 * coefficient), int(128 * coefficient)]
-    # model = MobileNetV2(num_of_channels=num_of_channels, nums_class=136)  # model
+    # model = MobileNetV2(num_of_channels=num_of_channels, nums_class=args.num_label)  # model
     # auxiliary_net = AuxiliaryNet(input_channels=num_of_channels[0])
     
     #BlazeLandMark
-    #model = BlazeLandMark(nums_class=136)
+    #model = BlazeLandMark(nums_class=args.num_label)
     #auxiliary_net = AuxiliaryNet(input_channels=48, first_conv_stride=2)
     
     """
@@ -98,15 +104,17 @@ def main(args):
         compound_coef=6 : efficientNet-b6;
         compound_coef=7 : efficientNet-b7;
     """
-    #model = EfficientLM(nums_class=136, compound_coef=0)
+    #model = EfficientLM(nums_class=args.num_label, compound_coef=0)
     #auxiliary_net = AuxiliaryNet(input_channels=model.p8_outchannels, first_conv_stride=2)
     
-    #model = HighResolutionNet(nums_class=136)
+    #model = HighResolutionNet(nums_class=args.num_label)
     #auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
     
-    model = MyResNest50(nums_class=136)
+    model = MyResNest50(nums_class=args.num_label * 2)
     auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
-    
+
+    start_epoch = 0
+
     if args.pretrained_model:
         pretrained_model = args.pretrained_model
         if args.all_model:
@@ -114,6 +122,8 @@ def main(args):
             if not os.path.isdir(pretrained_model):
                 print('Restoring pretrained model: {}'.format(pretrained_model))
                 model = torch.load(pretrained_model)
+                # import pdb;pdb.set_trace()
+                start_epoch = int(re.findall(r'\d+', os.path.basename(pretrained_model))[-1])
             else:
                 print('Model directory: {}'.format(pretrained_model))
                 files = os.listdir(pretrained_model)
@@ -121,10 +131,12 @@ def main(args):
                 model_path = os.path.join(pretrained_model, files[0])
                 print('Model name:{}'.format(files[0]))
                 model = torch.load(model_path)
+                start_epoch = int(re.findall(r'\d+', os.path.basename(model_path))[-1])
         else:
             if not os.path.isdir(pretrained_model):
                 print('Restoring pretrained model: {}'.format(pretrained_model))
                 model.load_state_dict(torch.load(pretrained_model))
+                start_epoch = int(re.findall(r'\d+', os.path.basename(pretrained_model))[-1])
             else:
                 print('Model directory: {}'.format(pretrained_model))
                 files = os.listdir(pretrained_model)
@@ -132,6 +144,7 @@ def main(args):
                 model_path = os.path.join(pretrained_model, files[0])
                 print('Model name:{}'.format(files[0]))
                 model.load_state_dict(torch.load(model_path))
+                start_epoch = int(re.findall(r'\d+', os.path.basename(model_path))[-1])
         test(test_loader, model, args, device)
 
     # print("Model's state_dict:")
@@ -146,9 +159,10 @@ def main(args):
     wing_loss = WingLoss(10.0, 2.0)
 
     print('Running train.')
+    print('start_epoch: ', start_epoch)
 
     start_time = time.time()
-    for epoch in range(args.max_epoch):
+    for epoch in range(start_epoch, args.max_epoch):
         model.train()
         auxiliary_net.train()
 
@@ -157,7 +171,7 @@ def main(args):
             landmarks_batch = Variable(landmarks_batch)
             pre_landmarks, auxiliary_features = model(images_batch)
             euler_angles_pre = auxiliary_net(auxiliary_features)
-            euler_angle_weights = get_euler_angle_weights(landmarks_batch, euler_angles_pre, device)
+            euler_angle_weights = get_euler_angle_weights(landmarks_batch, euler_angles_pre, device, args.num_label)
             loss = wing_loss(landmarks_batch.to(device), pre_landmarks, euler_angle_weights)
 
             optimizer.zero_grad()
@@ -176,13 +190,23 @@ def main(args):
                                                                                                remain_time))
         scheduler.step()
         # save model
+        """
         checkpoint_path = os.path.join(model_dir, 'model_'+str(epoch)+'.pth')
         if args.all_model:
             torch.save(model, checkpoint_path)
         else:
             torch.save(model.state_dict(), checkpoint_path)
+        """
+        # save all model
+        checkpoint_path = os.path.join(model_dir, 'all_model_'+str(epoch)+'.pth')
+        torch.save(model, checkpoint_path)
+        # save state dict
+        checkpoint_path = os.path.join(model_dir, 'model_'+str(epoch)+'.pth')
+        torch.save(model.state_dict(), checkpoint_path)
+        print("finish save pth model file")
 
-        test(test_loader, model, args, device)
+        if epoch % 3 == 0:
+            test(test_loader, model, args, device)
 
 
 def test(test_loader, model, args, device):
@@ -192,13 +216,20 @@ def test(test_loader, model, args, device):
     if not os.path.exists(sample_path):
         os.mkdir(sample_path)
 
+    test_num = 0
+    test_sum_time = 0
+    ave_test_time = 0
     loss_sum = 0
     landmark_error = 0
     landmark_01_num = 0
     for i_batch, (images_batch, landmarks_batch, attributes_batch) in enumerate(test_loader):
         images_batch = Variable(images_batch.to(device))
         landmarks_batch = Variable(landmarks_batch)
+        # inference
+        test_num += 1
+        st = time.time()
         pre_landmarks, euler_angles_pre = model(images_batch)
+        test_sum_time += time.time() - st
 
         images_batch = images_batch.cpu().numpy()
         landmarks_batch = landmarks_batch.numpy()
@@ -217,7 +248,7 @@ def test(test_loader, model, args, device):
                 error = np.sqrt(np.sum(error_diff * error_diff))
                 error_all_points += error
             interocular_distance = np.sqrt(np.sum(pow((landmarks_batch[k][72:74] - landmarks_batch[k][90:92]), 2)))
-            error_norm = error_all_points / (interocular_distance * 68)
+            error_norm = error_all_points / (interocular_distance * args.num_label)
             landmark_error += error_norm
             if error_norm >= 0.1:
                 landmark_01_num += 1
@@ -242,6 +273,10 @@ def test(test_loader, model, args, device):
                     cv2.circle(image_i, (x, y), 1, (255, 0, 0))
                 image_save_name = os.path.join(image_save_path, '{}.jpg'.format(j))
                 cv2.imwrite(image_save_name, image_i)
+
+    ave_test_time = test_sum_time / test_num
+    print("test_num: ", test_num)
+    print("ave test time: ", ave_test_time)
 
     loss = loss_sum / (len(test_loader) * args.batch_size)
     print('Test epochs: {}\tLoss {:2.3f}'.format(len(test_loader), loss))
@@ -298,6 +333,7 @@ def parse_arguments(argv):
     parser.add_argument('--level', type=str, default='L5')
     parser.add_argument('--save_image_example', action='store_false', default=True)
     parser.add_argument('--all_model', action='store_true', default=True)
+    parser.add_argument('--num_label', type=int, default=68)
 
     return parser.parse_args(argv)
 

@@ -84,7 +84,10 @@ class ImageDate():
         xy = center - boxsize//2
         x1, y1 = xy
         x2, y2 = xy + boxsize
-        height, width, _ = img.shape
+        try:
+            height, width, _ = img.shape
+        except:
+            import pdb;pdb.set_trace()
         dx = max(0, -x1)
         dy = max(0, -y1)
         x1 = max(0, x1)

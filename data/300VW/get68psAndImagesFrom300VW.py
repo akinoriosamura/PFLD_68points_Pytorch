@@ -87,18 +87,21 @@ def get_Infomation_list(root_dir, info_dir, lines):
         lines.append(line)
         index += 1
 
+    return lines
+
 
 def main(root_dir, fw_path_train, fw_path_test):
     train_lines = []
     train_dirs = os.listdir(root_dir+'/raw')
     for i, train_dir in enumerate(train_dirs):
         print('%d/%d,' % (i+1, len(train_dirs)), train_dir)
-        get_Infomation_list(root_dir+'/raw', train_dir, train_lines)
+        train_lines = get_Infomation_list(root_dir+'/raw', train_dir, train_lines)
+        # import pdb;pdb.set_trace()
     
     # test_lines = []
     # test_dirs = ['lfpw/testset', 'helen/testset']
     # for test_dir in test_dirs:
-    #     get_Infomation_list(root_dir+'/raw', test_dir, test_lines)
+    #     test_lines = get_Infomation_list(root_dir+'/raw', test_dir, test_lines)
 
     with open(fw_path_train, 'w') as fw:
         for i, line in enumerate(train_lines):

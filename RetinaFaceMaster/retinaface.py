@@ -134,7 +134,7 @@ class RetinaFace:
     print('sym size:', len(sym))
 
     image_size = (640, 640)
-    self.model = mx.mod.Module(symbol=sym, context=self.ctx, label_names=None)
+    self.model = mx.mod.Module(symbol=sym, context=mx.cpu(), label_names=None)# , context=self.ctx, label_names=None)
     self.model.bind(data_shapes=[('data', (1, 3, image_size[0], image_size[1]))], for_training=False)
     self.model.set_params(arg_params, aux_params)
 

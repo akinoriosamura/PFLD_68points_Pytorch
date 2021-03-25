@@ -9,9 +9,10 @@ import tensorflow as tf
 
 class DataSet(Dataset):
 
-    def __init__(self, file_list, image_channels, image_size, transforms=None,
+    def __init__(self, num_label, file_list, image_channels, image_size, transforms=None,
                  loader=tv.datasets.folder.default_loader, is_train=True):
-        self.file_list, self.landmarks, self.attributes = gen_data(file_list)
+        self.num_label = num_label
+        self.file_list, self.landmarks, self.attributes = gen_data(file_list, self.num_label)
         self.image_channels = image_channels
         assert self.image_channels == 3
         self.image_size = image_size
@@ -67,7 +68,7 @@ class DataSet(Dataset):
 #     return dataset, len(file_list)
 
 
-def gen_data(file_list):
+def gen_data(file_list, num_label):
     with open(file_list, 'r') as f:
         lines = f.readlines()
 
@@ -75,8 +76,10 @@ def gen_data(file_list):
     for line in lines:
         line = line.strip().split()
         path = line[0]
-        landmark = np.asarray(line[1:137], dtype=np.float32)
-        attribute = np.asarray(line[137:], dtype=np.int32)
+        # print(line)
+        # print(len(line))
+        landmark = np.asarray(line[1:num_label*2+1], dtype=np.float32)
+        attribute = np.asarray(line[num_label*2+1:], dtype=np.int32)
         filenames.append(path)
         landmarks.append(landmark)
         attributes.append(attribute)

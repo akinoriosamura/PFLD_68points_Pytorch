@@ -6,12 +6,15 @@ import shutil
 
 
 def main(root_dir):
-    files = ['300W/train_data/list.txt', 'WFLW/train_data/list.txt', '300VW/train_data/list.txt']
-    dst_dir = os.path.join(root_dir, 'train_data')
+    NUM_LABEL = '98'
+    # files = ['300W/train_data/list.txt', 'WFLW/train_data/list.txt', '300VW/train_data/list.txt']
+    # files = ['WFLW/train_data/list.txt']
+    files = ['WFLW/train_data_98/list.txt']
+    dst_dir = os.path.join(root_dir, 'train_data_' + NUM_LABEL)
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
     dst_path = os.path.join(dst_dir, 'list.txt')
-    
+
     with open(dst_path, 'w') as fw:
         for file_path in files:
             fp = os.path.join(root_dir, file_path)
@@ -20,9 +23,11 @@ def main(root_dir):
                     lines = fr.readlines()
                     for index, line in enumerate(lines):
                         fw.write(line)
-    
-    test_files = ['300W/test_data/list.txt', 'WFLW/test_data/list.txt', '300VW/test_data/list.txt']
-    test_dst_dir = os.path.join(root_dir, 'test_data')
+
+    # test_files = ['300W/test_data/list.txt', 'WFLW/test_data/list.txt', '300VW/test_data/list.txt']
+    # test_files = ['WFLW/test_data/list.txt']
+    test_files = ['WFLW/test_data_98/list.txt']
+    test_dst_dir = os.path.join(root_dir, 'test_data_' + NUM_LABEL)
     if not os.path.exists(test_dst_dir):
         os.mkdir(test_dst_dir)
     test_dst_path = os.path.join(test_dst_dir, 'list.txt')

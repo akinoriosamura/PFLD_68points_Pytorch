@@ -1,0 +1,7 @@
+data/*
+models2/*
+nohup.out
+sample_trial_wflw68/
+data/300VW/annotations/list_68pt_rect_attr_train_test/*
+data/300W/annotations/list_68pt_rect_attr_train_test/*
+data/300W/annotations/list_68pt_rect_attr_train_test/*

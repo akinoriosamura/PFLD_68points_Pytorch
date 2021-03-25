@@ -4,6 +4,7 @@ import numpy as np
 import datetime
 import os
 import glob
+
 from .retinaface import RetinaFace
 
 
@@ -66,7 +67,7 @@ scales = [120, 160]
 
 model_path, _ = os.path.split(os.path.realpath(__file__))
 model_path = os.path.join(model_path, 'mnet.25/mnet.25')
-detector = RetinaFace(model_path, 0, ctx_id=0, network='net3')
+detector = RetinaFace(model_path, 0000, ctx_id=0, network='net3')
 
 
 def predict(image):
