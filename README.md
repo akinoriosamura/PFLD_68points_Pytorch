@@ -2,6 +2,15 @@
 
 Implementation of PFLD For 68 Facial Landmarks By Pytorch
 
+## setup
+ ```
+ git submodule update --init --recursive
+ pip install pipenv
+ pipenv shell
+ pip install -r requirements.txt
+ ```
+
+## Run PFLD and ResNest landmark models
 ### DataSets
 - **WFLW Dataset**  
 
@@ -152,3 +161,27 @@ tensorflow：https://github.com/tensorflow/tpu/tree/master/models/official/effic
 keras: https://github.com/qubvel/efficientnet
 
 Tensorflow Implementation for 98 Facial Landmarks: https://github.com/guoqiangqi/PFLD
+
+
+## convert to tflite
+### preparatino
+ - install customize onnx2keras
+ ```
+ cd onnx2keras
+ python setup.py install
+ cd ../
+ ```
+ - update converting pytorch model path, saving model path, model input size, input_name and output_name in `allpth2tflite.py`
+ - run convert
+ ```
+ python allpth2tflite.py
+ ```
+ - you can get onnx, keras, savedmodel and tflite model
+ - test dataset dir
+ ```
+ python tflite_test.py
+ ```
+ - test one image
+ ```
+ python inf_tflite.py
+ ```
