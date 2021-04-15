@@ -13,10 +13,11 @@ from mtcnn.detect_face import MTCNN
 from model2 import MobileNetV2, BlazeLandMark, MyResNest50
 import torch
 import shutil
+from tensorflow.lite.python.interpreter import Interpreter
 
 
 def main():
-    model_path = 'models2/wflw_moruhard_grow_68_Res50/all_model_83.pth'
+    model_file = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.tflite'
     images_dir = './testdata/'  #'./data/test_data/imgs/'
     image_size = 128  # 112
     labeled_dir = './show_labeled_wflw_moruhard_grow_68_Res50'
@@ -26,11 +27,13 @@ def main():
         shutil.rmtree(labeled_dir)
         os.mkdir(labeled_dir)
 
-    # model = BlazeLandMark(nums_class=136)
-    model = MyResNest50(nums_class=136)
-    model = torch.load(model_path, map_location=torch.device('cpu'))
-    # import pdb;pdb.set_trace()
-    model.eval()
+    # インタプリタの生成
+    interpreter = Interpreter(model_path=model_file)
+    interpreter.allocate_tensors()
+    # 入力情報と出力情報の取得
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
     image_files = os.listdir(images_dir)
     total_time = 0
     total_num = 0
@@ -74,20 +77,21 @@ def main():
             cropped = cv2.resize(cropped, (image_size, image_size))
             cv2.imwrite(os.path.join("samples", image_file[:-4] + ".png"), cropped)
             input = cv2.resize(cropped, (image_size, image_size))
-            input = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
+            input = cv2.cvtColor(input, cv2.COLOR_RGB2BGR)
             input = input.astype(np.float32) / 256.0
             input = np.expand_dims(input, 0)
-            input = torch.Tensor(input.transpose((0, 3, 1, 2)))
+            # input = torch.Tensor(input.transpose((0, 3, 1, 2)))
+            interpreter.set_tensor(input_details[0]['index'], input)
 
             cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0))
             import time
             st = time.time()
-            pre_landmarks, _ = model(input) #.cuda())
+            interpreter.invoke()
             total_time += time.time() - st
             total_num += 1
-            pre_landmark = pre_landmarks[0].cpu().detach().numpy()
-            pre_landmark = pre_landmark.reshape(-1, 2) * [image_size, image_size]
-            
+            output_data = interpreter.get_tensor(output_details[-1]['index'])
+            pre_landmark = output_data.reshape(-1, 2) * [image_size, image_size]
+
             # for (x, y) in pre_landmark.astype(np.int32):
             #     cv2.circle(cropped, (x, y), 1, (0, 0, 255), 2)
             # cv2.imshow('1', cropped)
