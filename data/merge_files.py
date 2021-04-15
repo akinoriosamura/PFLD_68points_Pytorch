@@ -6,10 +6,10 @@ import shutil
 
 
 def main(root_dir):
-    NUM_LABEL = '98'
+    NUM_LABEL = '68'
     # files = ['300W/train_data/list.txt', 'WFLW/train_data/list.txt', '300VW/train_data/list.txt']
-    # files = ['WFLW/train_data/list.txt']
-    files = ['WFLW/train_data_98/list.txt']
+    files = ['WFLW/train_data/list.txt', 'moru_hard_20200716/train_data/list.txt', 'growing/train_data/list.txt']
+    # files = ['WFLW/train_data_98/list.txt']
     dst_dir = os.path.join(root_dir, 'train_data_' + NUM_LABEL)
     if not os.path.exists(dst_dir):
         os.mkdir(dst_dir)
@@ -25,8 +25,8 @@ def main(root_dir):
                         fw.write(line)
 
     # test_files = ['300W/test_data/list.txt', 'WFLW/test_data/list.txt', '300VW/test_data/list.txt']
-    # test_files = ['WFLW/test_data/list.txt']
-    test_files = ['WFLW/test_data_98/list.txt']
+    test_files = ['WFLW/test_data/list.txt', 'moru_hard_20200716/test_data/list.txt', 'growing/test_data/list.txt']
+    # test_files = ['WFLW/test_data_98/list.txt']
     test_dst_dir = os.path.join(root_dir, 'test_data_' + NUM_LABEL)
     if not os.path.exists(test_dst_dir):
         os.mkdir(test_dst_dir)

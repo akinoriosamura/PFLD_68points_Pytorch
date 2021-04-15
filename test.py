@@ -19,7 +19,7 @@ import torch
 def main():
     model_path = './models2/trial_wflw68/model_100.pth'
     images_dir = './data/Sample_imgs/'
-    image_size = 112  # 112
+    image_size = 128  # 112
     out_dir = 'sample_trial_wflw68'
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
@@ -100,7 +100,7 @@ def main():
 def _main():
     model_file = './models2/model0/model_499.pth'
     videl_file = './dfl.mov'
-    image_size = 112  # 112
+    image_size = 128  # 112
 
     # coefficient = 0.25
     # print(coefficient)

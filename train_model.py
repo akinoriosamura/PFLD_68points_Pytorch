@@ -18,7 +18,7 @@ import sys
 import re
 import time
 from generate_data import DataSet
-from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50
+from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50, MyResNest269
 from utils import train_model
 from euler_angles_utils import calculate_pitch_yaw_roll
 
@@ -112,6 +112,8 @@ def main(args):
     
     model = MyResNest50(nums_class=args.num_label * 2)
     auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
+    # model = MyResNest269(nums_class=args.num_label * 2)
+    # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
 
     start_epoch = 0
 
@@ -322,7 +324,7 @@ def parse_arguments(argv):
     parser.add_argument('--loss_log_dir', type=str, default='./train_loss_log/')
     parser.add_argument('--seed', type=int, default=666)
     parser.add_argument('--max_epoch', type=int, default=1000)
-    parser.add_argument('--image_size', type=int, default=112)
+    parser.add_argument('--image_size', type=int, default=128)
     parser.add_argument('--image_channels', type=int, default=3)
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--pretrained_model', type=str, default='')

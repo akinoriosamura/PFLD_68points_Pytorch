@@ -94,11 +94,11 @@ if __name__ == '__main__':
     file_list = 'data/train_data/list.txt'
 
     data_transforms = tv.transforms.Compose([
-        tv.transforms.Resize((112, 112)),
+        tv.transforms.Resize((128, 128)),
         tv.transforms.ToTensor()
     ])
 
-    train_dataset = DataSet(file_list, 3, 112, transforms=data_transforms)
+    train_dataset = DataSet(file_list, 3, 128, transforms=data_transforms)
     for i in range(len(train_dataset)):
         image, landmarks, attributes = train_dataset[i]
         # cv2.imshow('0', image)
