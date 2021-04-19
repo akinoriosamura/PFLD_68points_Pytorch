@@ -108,16 +108,29 @@ def main():
     ####### compare onnx value with keras
     # compare_value('samples/croped.jpg', 128, onnx_simp_model, k_model)
 
-    k_model.save('models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.h5')
+    k_model_path = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.h5'
+    k_model.save(k_model_path)
     saved_model_dir = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt_saved_model'
     tf.saved_model.save(k_model, saved_model_dir)
 
-    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
+    tflite_model_path = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.tflite'
+
+    # converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_dir)
+    # tflite_model = converter.convert()
+    # with open(tflite_model_path, 'wb') as f:
+    #     f.write(tflite_model)
+
+    converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(k_model_path)
     tflite_model = converter.convert()
-
-    with open('models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.tflite', 'wb') as f:
-        f.write(tflite_model)
-
+    open(tflite_model_path, "wb").write(tflite_model)
 
 if __name__ == '__main__':
+    k_model_path = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.h5'
+    tflite_model_path = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.tflite'
+    converter = tf.compat.v1.lite.TFLiteConverter.from_keras_model_file(k_model_path)
+    converter.experimental_new_converter = True
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    tflite_model = converter.convert()
+    open(tflite_model_path, "wb").write(tflite_model)
+    import pdb;pdb.set_trace()
     main()

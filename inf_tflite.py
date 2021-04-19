@@ -11,9 +11,9 @@ from tensorflow.lite.python.interpreter import Interpreter
 from RetinaFaceMaster.test import predict
 
 
-# メインの実行
 def inference(image):
-    model_file = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.tflite'
+    model_file = 'models2/wflw_moruhard_grow_68_Res50/wflw_moruhard_grow_68_Res50.tflite'
+    # model_file = 'models2/wflw_moruhard_grow_68_Res50/all_model_85_opt.tflite'
     height, width, _ = image.shape
     boxes, _ = predict(image)
 
@@ -61,9 +61,11 @@ def inference(image):
         cv2.imwrite('samples/croped.jpg', cropped)
         # 入力データの生成
         input = cv2.resize(cropped, (image_size, image_size))
-        input = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
-        input = input.astype(np.float32) / 255
-        input_data = np.expand_dims(input, 0)
+        input_data = cv2.cvtColor(input, cv2.COLOR_BGR2RGB)
+        input_data = input_data.astype(np.float32) / 256
+        input_data = np.expand_dims(input_data, 0)
+        # print(input_data)
+        print(input_data.shape)
         interpreter.set_tensor(input_details[0]['index'], input_data)
         cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0))
         # 推論の実行
@@ -73,18 +75,18 @@ def inference(image):
         print("el: ", time.time() - st)
 
         output_data = interpreter.get_tensor(output_details[-1]['index'])
-        # import pdb; pdb.set_trace()
         pre_landmark = output_data.reshape(-1, 2) * [image_size, image_size]
 
-        # for (x, y) in pre_landmark.astype(np.int32):
-        #     cv2.circle(cropped, (x, y), 1, (0, 0, 255), 2)
+        for (x, y) in pre_landmark.astype(np.int32):
+            cv2.circle(input, (x, y), 1, (0, 0, 255), 2)
+        cv2.imwrite('samples/labeled.jpg', input)
         # cv2.imshow('1', cropped)
 
-        pre_landmark = pre_landmark * [size/image_size, size/image_size] - [dx, dy]
-        for (x, y) in pre_landmark.astype(np.int32):
-            cv2.circle(image, (x1 + x, y1 + y), 2, (0, 0, 255), 2)
-    image = cv2.resize(image, (width, height))
-    cv2.imwrite('samples/labeled.jpg', image)
+        # pre_landmark = pre_landmark * [size/image_size, size/image_size] - [dx, dy]
+        # for (x, y) in pre_landmark.astype(np.int32):
+        #     cv2.circle(image, (x1 + x, y1 + y), 2, (0, 0, 255), 2)
+    # image = cv2.resize(image, (width, height))
+    # cv2.imwrite('samples/labeled.jpg', image)
 
 
 if __name__ == '__main__':
