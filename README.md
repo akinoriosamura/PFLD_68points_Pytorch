@@ -185,3 +185,5 @@ Tensorflow Implementation for 98 Facial Landmarks: https://github.com/guoqiangqi
  ```
  python inf_tflite.py
  ```
+
+  - tflite model has two outputs, and landmark is [, 136] output
