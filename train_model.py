@@ -112,6 +112,8 @@ def main(args):
     
     # model = MyResNest50(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
+    # model = MyResNest101(nums_class=args.num_label * 2)
+    # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
     model = MyResNest200(nums_class=args.num_label * 2)
     auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
     # model = MyResNest269(nums_class=args.num_label * 2)
