@@ -92,6 +92,12 @@ Implementation of PFLD, Resnest and so on For 68 Facial Landmarks By Pytorch
    $ python3 test.py
   ~~~
 
+  - caution:
+  if you get downloading resnest model forbidden error 403 in starting to train, you get models from below link and please set the pth model in `~/.cache/torch/hub/checkpoints/`.
+   - ![resnest101](https://dl.dropboxusercontent.com/s/x5qr07zpl9pxufw/resnest101-22405ba7.pth?dl=0)
+   - ![resnest200](https://drive.google.com/file/d/1uSSvy4V7ALjousc7Tqy3tlGH7nLUijhG/view?usp=sharing)
+   - ![resnest269](https://drive.google.com/file/d/1dwMhRiuz-E7je-gK0mEFrIXp33MU2_FP/view?usp=sharing)
+
 ### Result
 
   Sample IMGs:  
