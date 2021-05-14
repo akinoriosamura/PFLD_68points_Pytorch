@@ -1,6 +1,6 @@
-# PFLD_68Points_Pytorch
+# 68Points_Pytorch
 
-Implementation of PFLD For 68 Facial Landmarks By Pytorch
+Implementation of PFLD, Resnest and so on For 68 Facial Landmarks By Pytorch
 
 ## setup
  ```
