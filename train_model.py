@@ -18,7 +18,7 @@ import sys
 import re
 import time
 from generate_data import DataSet
-from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50, MyResNest269
+from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50, MyResNest200, MyResNest269
 from utils import train_model
 from euler_angles_utils import calculate_pitch_yaw_roll
 
@@ -110,8 +110,10 @@ def main(args):
     #model = HighResolutionNet(nums_class=args.num_label)
     #auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
     
-    model = MyResNest50(nums_class=args.num_label * 2)
-    auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
+    # model = MyResNest50(nums_class=args.num_label * 2)
+    # auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
+    model = MyResNest200(nums_class=args.num_label * 2)
+    auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
     # model = MyResNest269(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
 

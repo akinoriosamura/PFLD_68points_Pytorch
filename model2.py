@@ -1168,6 +1168,33 @@ class MyResNest50(nn.Module):
         out = self.fc(out)
         return out, auxnet
 
+# resNest200
+from resnest.torch import resnest200
+class MyResNest200(nn.Module):
+    
+    def __init__(self, nums_class=136):
+        super(MyResNest200, self).__init__()
+
+        self.resnest = resnest200(pretrained=True)
+        self.resnest_backbone1 = nn.Sequential(*list(self.resnest.children())[:-6])
+        self.resnest_backbone_end = nn.Sequential(*list(self.resnest.children())[-6:-2])
+        
+        self.in_features = 2048 * 4 * 4
+        self.fc = nn.Linear(in_features=self.in_features, out_features=nums_class)
+
+    def forward(self, x):
+        # (x has shape (batch_size, 3, h, w))
+
+        # pass x through (parts of) the pretrained ResNet:
+        # import pdb;pdb.set_trace()
+        auxnet = self.resnest_backbone1(x)
+        # print(auxnet.size())
+        out = self.resnest_backbone_end(auxnet)
+        # print(out.size())
+        out = out.view(out.size(0), -1)
+        out = self.fc(out)
+        return out, auxnet
+
 # resNest269
 from resnest.torch import resnest269
 class MyResNest269(nn.Module):
