@@ -18,7 +18,7 @@ import sys
 import re
 import time
 from generate_data import DataSet
-from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50, MyResNest200, MyResNest269
+from model2 import MobileNetV2, BlazeLandMark, AuxiliaryNet, WingLoss, EfficientLM, HighResolutionNet, MyResNest50, MyResNest101, MyResNest200, MyResNest269
 from utils import train_model
 from euler_angles_utils import calculate_pitch_yaw_roll
 
@@ -112,10 +112,10 @@ def main(args):
     
     # model = MyResNest50(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
-    # model = MyResNest101(nums_class=args.num_label * 2)
-    # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
-    model = MyResNest200(nums_class=args.num_label * 2)
+    model = MyResNest101(nums_class=args.num_label * 2)
     auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
+    # model = MyResNest200(nums_class=args.num_label * 2)
+    # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
     # model = MyResNest269(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
 
@@ -125,15 +125,17 @@ def main(args):
         pretrained_model = args.pretrained_model
         if args.all_model:
             print('load all model, model graph and weight included!')
+            print(args.all_model)
             if not os.path.isdir(pretrained_model):
-                print('Restoring pretrained model: {}'.format(pretrained_model))
+                print('Restoring pretrained all model: {}'.format(pretrained_model))
                 model = torch.load(pretrained_model)
                 # import pdb;pdb.set_trace()
                 start_epoch = int(re.findall(r'\d+', os.path.basename(pretrained_model))[-1])
             else:
                 print('Model directory: {}'.format(pretrained_model))
                 files = os.listdir(pretrained_model)
-                assert len(files) == 1 and files[0].split('.')[-1] in ['pt', 'pth']
+                print(files)
+                assert files[0].split('.')[-1] in ['pt', 'pth']
                 model_path = os.path.join(pretrained_model, files[0])
                 print('Model name:{}'.format(files[0]))
                 model = torch.load(model_path)
@@ -146,7 +148,7 @@ def main(args):
             else:
                 print('Model directory: {}'.format(pretrained_model))
                 files = os.listdir(pretrained_model)
-                assert len(files) == 1 and files[0].split('.')[-1] in ['pt', 'pth']
+                assert files[0].split('.')[-1] in ['pt', 'pth']
                 model_path = os.path.join(pretrained_model, files[0])
                 print('Model name:{}'.format(files[0]))
                 model.load_state_dict(torch.load(model_path))
