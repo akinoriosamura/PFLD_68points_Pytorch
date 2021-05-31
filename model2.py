@@ -1187,12 +1187,13 @@ class MyResNest101(nn.Module):
 
         # pass x through (parts of) the pretrained ResNet:
         # import pdb;pdb.set_trace()
+        # print(x.size())
         auxnet = self.resnest_backbone1(x)
         # print(auxnet.size())
         out = self.resnest_backbone_end(auxnet)
-        # print(out.size())
         out = out.view(out.size(0), -1)
         out = self.fc(out)
+        # print(out.size())
         return out, auxnet
 
 # resNest200

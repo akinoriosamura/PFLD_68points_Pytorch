@@ -112,10 +112,10 @@ def main(args):
     
     # model = MyResNest50(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=64, first_conv_stride=2)
-    model = MyResNest101(nums_class=args.num_label * 2)
-    auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
-    # model = MyResNest200(nums_class=args.num_label * 2)
+    # model = MyResNest101(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
+    model = MyResNest200(nums_class=args.num_label * 2)
+    auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
     # model = MyResNest269(nums_class=args.num_label * 2)
     # auxiliary_net = AuxiliaryNet(input_channels=128, first_conv_stride=2)
 
@@ -220,7 +220,7 @@ def main(args):
 def test(test_loader, model, args, device):
 
     model.eval()
-    sample_path = os.path.join(args.model_dir, 'HeatMaps')
+    sample_path = os.path.join(args.model_dir, 'test_train_examples')
     if not os.path.exists(sample_path):
         os.mkdir(sample_path)
 
@@ -298,8 +298,8 @@ def test(test_loader, model, args, device):
 
 
 def save_image_example(train_loader, args):
-    save_nbatch = 10
-    save_path = os.path.join(args.model_dir, 'image_example')
+    save_nbatch = 3
+    save_path = os.path.join(args.model_dir, 'train_example')
     if not os.path.exists(save_path):
         os.mkdir(save_path)
     for i_batch, (images, landmarks, attributes) in enumerate(train_loader):
